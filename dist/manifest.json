@@ -1,0 +1,10 @@
+{
+  "name": "Fixed-Hug-Fill",
+  "id": "994314547752599560",
+  "api": "1.0.0",
+  "main": "code.js",
+  "editorType": [
+    "figma"
+  ],
+  "ui": "index.html"
+}

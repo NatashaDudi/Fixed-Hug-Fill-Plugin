@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+        <link rel="stylesheet" href="./tmp/figma-plugin-ds.css"> <!-- Figma Plugin DS Styles -->
+        <link rel="stylesheet" href="./tmp/styles.css"> <!-- Your Styles -->
+    </head>
+    <body>
+        <p><br></p>
+
+        <p class="type--small">Change all frames in <strong>width</strong> dimension &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <select name="width" id="width_select">
+                <option value="">No Changes</option>
+                <option value="fix">Fixed Width</option>
+                <option value="hug">Hug Contents</option>
+                <option value="fill">Fill Container</option>
+            </select>
+        </p>
+
+        <div>
+            <input type="checkbox" id="w_innerst_child" name="w_innerst_child" checked="checked">
+            <label for="w_innerst_child" class="type--small"> include innerst content</label><br>
+        </div>
+
+        <p><br></p>
+
+        <p class="type--small">Change all frames in <strong>height</strong> dimension &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;
+            <select name="height" id="height_select">
+                <option value="">No Changes</option>
+                <option value="fix">Fixed Height</option>
+                <option value="hug">Hug Contents</option>
+                <option value="fill">Fill Container</option>
+            </select>
+        </p>
+
+        <div>
+            <input type="checkbox" id="h_innerst_child" name="h_innerst_child" checked="checked">
+            <label for="h_innerst_child" class="type--small"> include innerst content</label>
+        </div>
+
+        <p></p>
+
+        <div class="btn-group">
+            <button id="cancel" class='button button--secondary'>Cancel</button>
+            <button id="build" class='button button--primary'>Apply changes</button> 
+        </div>
+
+        <script>
+            document.getElementById('build').onclick = () => {
+            parent.postMessage({ pluginMessage: { 
+                type: 'start', 
+                width: document.getElementById('width_select').value,
+                w_innerst_child: document.getElementById('w_innerst_child').checked,
+                height: document.getElementById('height_select').value,
+                h_innerst_child: document.getElementById('h_innerst_child').checked,
+            } }, '*')
+            }
+            
+            document.getElementById('cancel').onclick = () => {
+            parent.postMessage({ pluginMessage: { type: 'cancel' } }, '*')
+            }
+        </script>
+
+    <script src="./tmp/scripts.js"></script>
+    </body>
+</html>
