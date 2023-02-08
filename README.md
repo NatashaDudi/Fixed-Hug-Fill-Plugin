@@ -4,6 +4,6 @@ _Fixed-Hug-Fill_ is a plugin for Figma to get an object with autolayout and chan
 
 TO DO:
 - General testing
-- expand plugin so that it can be used with objects of type 'TEXT' and 'COMPONENT', ...
+- Expand plugin so that it can be used with objects of type 'TEXT' and 'COMPONENT', ...
 - Find out why it does not seem possible to change from 'fill' to 'hug'.
 
