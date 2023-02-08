@@ -55,14 +55,14 @@ figma.ui.onmessage = msg => {
             if ('children' in currentNode) {
                 var childrenNodes = currentNode.findAll();
                 // making sure all frames are "fix" before "fill"
-                if (msg.width == 'fill') {
+                if (msg.width == 'fill' || msg.width == 'hug') {
                     for (var child of childrenNodes) {
                         if (child.type == 'FRAME') {
                             child.primaryAxisSizingMode = 'FIXED';
                         }
                     }
                 }
-                if (msg.height == 'fill') {
+                if (msg.height == 'fill' || msg.width == 'hug') {
                     for (var child of childrenNodes) {
                         if (child.type == 'FRAME') {
                             child.counterAxisSizingMode = 'FIXED';

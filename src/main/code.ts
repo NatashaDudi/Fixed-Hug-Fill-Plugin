@@ -70,7 +70,7 @@ figma.ui.onmessage = msg => {
 
 
 				// making sure all frames are "fix" before "fill"
-				if(msg.width == 'fill') {
+				if(msg.width == 'fill' || msg.width == 'hug') {
 					for (var child of childrenNodes) {
 						if (child.type == 'FRAME') {
 							child.primaryAxisSizingMode = 'FIXED'
@@ -78,7 +78,7 @@ figma.ui.onmessage = msg => {
 
 					}
 				}
-				if(msg.height == 'fill') {
+				if(msg.height == 'fill' || msg.width == 'hug') {
 					for (var child of childrenNodes) {
 						if (child.type == 'FRAME') {
 							child.counterAxisSizingMode = 'FIXED'
