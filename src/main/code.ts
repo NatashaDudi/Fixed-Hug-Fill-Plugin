@@ -94,19 +94,24 @@ figma.ui.onmessage = msg => {
 						if ((msg.width == 'fill' && child.type == 'FRAME' || child.type == 'COMPONENT' || child.type == 'INSTANCE')) {
 							if (child.layoutMode == 'VERTICAL') {
 								child.counterAxisSizingMode = 'FIXED'
-								child.layoutAlign = 'INHERIT'
+								child.layoutGrow = 0
 							} else {
 								child.primaryAxisSizingMode = 'FIXED'
-								child.layoutGrow = 0
+								
 							}
+							child.layoutAlign = 'INHERIT'
+
 						} else if (msg.width == 'hug' && (child.type == 'FRAME' /*|| child.type == "COMPONENT" || child.type == 'INSTANCE'*/)) {
 							if (child.layoutMode == 'HORIZONTAL') {
 								child.counterAxisSizingMode = 'FIXED'
-								//child.layoutAlign = 'INHERIT'
+								child.layoutGrow = 0
+								
 							} else {
 								child.primaryAxisSizingMode = 'FIXED'
-								//child.layoutGrow = 0
 							}
+							child.layoutAlign = 'INHERIT'
+							
+							
 						}
 
 					}
@@ -116,19 +121,22 @@ figma.ui.onmessage = msg => {
 						if (msg.height == 'fill' && (child.type == 'FRAME' || child.type == 'COMPONENT' || child.type == 'INSTANCE')) {
 							if (child.layoutMode == 'HORIZONTAL') {
 								child.counterAxisSizingMode = 'FIXED'
-								child.layoutAlign = 'INHERIT'
+								child.layoutGrow = 0
 							} else {
 								child.primaryAxisSizingMode = 'FIXED'
-								child.layoutGrow = 0
+								
 							}
-						} else if (msg.height == 'fill' && (child.type == 'FRAME' || child.type == 'COMPONENT' || child.type == 'INSTANCE')) {
+							child.layoutAlign = 'INHERIT'
+						} else if (msg.height == 'hug' && (child.type == 'FRAME' || child.type == 'COMPONENT' || child.type == 'INSTANCE')) {
 							if (child.layoutMode == 'VERTICAL') {
 								child.counterAxisSizingMode = 'FIXED'
-								child.layoutAlign = 'INHERIT'
+								child.layoutGrow = 0
+								
 							} else {
 								child.primaryAxisSizingMode = 'FIXED'
-								child.layoutGrow = 0
+								
 							}
+							child.layoutAlign = 'INHERIT'
 						}
 					}
 				}
