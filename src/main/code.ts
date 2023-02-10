@@ -19,9 +19,12 @@ figma.ui.onmessage = msg => {
 			figma.closePlugin("You need to select something to use this plugin.");
 		}
 
+		// do the following code with all selected objects
 		for (var i in figma.currentPage.selection) {
 			var currentNode = figma.currentPage.selection[i]
-			// change current node
+			/* change current node. 
+			When 'fix' or 'filled' the current node always has to be fixed
+			whereas with 'hug' it is also set to 'hug'. */
 			var node = currentNode as FrameNode
 			switch (msg.width) {
 				case 'fix':
@@ -82,14 +85,13 @@ figma.ui.onmessage = msg => {
 				default:
 			}
 
-
 			// look at all children of the selected node
 			if ('children' in currentNode) {
 				var childrenNodes = currentNode.findAll()
-				// making sure all frames are "fix" before "fill"
+				// making sure all frames are 'fix' before 'fill' or 'hug'
 				if(msg.width == 'fill' || msg.width == 'hug') {
 					for (var child of childrenNodes) {
-						if (child.type == 'FRAME' && msg.width == 'fill' ) {
+						if ((msg.width == 'fill' && child.type == 'FRAME' || child.type == 'COMPONENT' || child.type == 'INSTANCE')) {
 							if (child.layoutMode == 'VERTICAL') {
 								child.counterAxisSizingMode = 'FIXED'
 								child.layoutAlign = 'INHERIT'
@@ -97,22 +99,21 @@ figma.ui.onmessage = msg => {
 								child.primaryAxisSizingMode = 'FIXED'
 								child.layoutGrow = 0
 							}
-						} else if (child.type == 'FRAME' && msg.width == 'hug' ) {
+						} else if (msg.width == 'hug' && (child.type == 'FRAME' /*|| child.type == "COMPONENT" || child.type == 'INSTANCE'*/)) {
 							if (child.layoutMode == 'HORIZONTAL') {
 								child.counterAxisSizingMode = 'FIXED'
-								child.layoutAlign = 'INHERIT'
+								//child.layoutAlign = 'INHERIT'
 							} else {
 								child.primaryAxisSizingMode = 'FIXED'
-								child.layoutGrow = 0
+								//child.layoutGrow = 0
 							}
 						}
-						
 
 					}
 				}
 				if(msg.height == 'fill' || msg.width == 'hug') {
 					for (var child of childrenNodes) {
-						if (child.type == 'FRAME' && msg.width == 'fill') {
+						if (msg.height == 'fill' && (child.type == 'FRAME' || child.type == 'COMPONENT' || child.type == 'INSTANCE')) {
 							if (child.layoutMode == 'HORIZONTAL') {
 								child.counterAxisSizingMode = 'FIXED'
 								child.layoutAlign = 'INHERIT'
@@ -120,8 +121,7 @@ figma.ui.onmessage = msg => {
 								child.primaryAxisSizingMode = 'FIXED'
 								child.layoutGrow = 0
 							}
-
-						} else if (child.type == 'FRAME' && msg.width == 'hug' ) {
+						} else if (msg.height == 'fill' && (child.type == 'FRAME' || child.type == 'COMPONENT' || child.type == 'INSTANCE')) {
 							if (child.layoutMode == 'VERTICAL') {
 								child.counterAxisSizingMode = 'FIXED'
 								child.layoutAlign = 'INHERIT'
@@ -130,16 +130,14 @@ figma.ui.onmessage = msg => {
 								child.layoutGrow = 0
 							}
 						}
-
-						
-
 					}
-				} 
+				}
 
 
-				
-
+				// iterate over all children
 				for (var child of childrenNodes) {
+
+					// cast them to their given type to use methods 'layoutAlign' and 'layoutGrow'
 					if(child.type == 'FRAME' || child.type == 'COMPONENT' || child.type == 'INSTANCE') {
 						var childNode;
 						switch(child.type) {
@@ -155,6 +153,7 @@ figma.ui.onmessage = msg => {
 							default:
 						}
 
+						// check what width alignment is wished for and change settings according to that wish
 						switch (msg.width) {
 							case 'fix':
 								childNode.layoutGrow = 0
@@ -162,13 +161,8 @@ figma.ui.onmessage = msg => {
 									childNode.counterAxisSizingMode = 'FIXED'
 								} else {
 									childNode.primaryAxisSizingMode = 'FIXED'
-									
 								}
-								childNode.layoutAlign = 'INHERIT'
-								
-								
-								
-								
+								childNode.layoutAlign = 'INHERIT'	
 							break
 							case 'hug':
 								if (childNode.layoutMode == 'VERTICAL') {
@@ -176,7 +170,6 @@ figma.ui.onmessage = msg => {
 								} else {
 									childNode.primaryAxisSizingMode = 'AUTO'
 								}
-								
 							break
 							case 'fill':
 								switch(childNode.parent.type) {
@@ -198,13 +191,13 @@ figma.ui.onmessage = msg => {
 									
 									childNode.layoutAlign = 'STRETCH'
 								}
-
 							break
 							case '':
 								break
 							default:
 						}
 
+						// check what height alignment is wished for and change settings according to that wish
 						switch (msg.height) {
 							case 'fix':
 								childNode.layoutGrow = 0
@@ -214,17 +207,13 @@ figma.ui.onmessage = msg => {
 									childNode.primaryAxisSizingMode = 'FIXED'
 								}
 								childNode.layoutAlign = 'INHERIT'
-								
-								
 							break
 							case 'hug':
 								if (childNode.layoutMode == 'HORIZONTAL') {
 									childNode.counterAxisSizingMode = 'AUTO'
 								} else {
 									childNode.primaryAxisSizingMode = 'AUTO'
-									
 								}
-								
 							break
 							case 'fill':
 								switch(childNode.parent.type) {
@@ -244,14 +233,12 @@ figma.ui.onmessage = msg => {
 								} else {
 									childNode.layoutAlign = 'STRETCH'
 								}
-								
 							break
 							case '':
 								break
 							default:
 						}
-
-						
+						// FOR FURTHER DEVELOPMENT: Line underneath to test for nodes of type 'TEXT'
 					} /*else if (child.type == 'TEXT') {
 						var childNode2 = child as TextNode
 
@@ -285,18 +272,9 @@ figma.ui.onmessage = msg => {
 							default:
 							}
 					}*/
-
-						
 				}
-		
+			}
 		}
-		
-
-
-		
-
-		}
-
 		figma.closePlugin(msg.width);
 	} else {
 		// user pressed cancel
