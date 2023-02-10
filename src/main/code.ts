@@ -156,11 +156,13 @@ figma.ui.onmessage = msg => {
 						// check what width alignment is wished for and change settings according to that wish
 						switch (msg.width) {
 							case 'fix':
-								childNode.layoutGrow = 0
+								
 								if (childNode.layoutMode == 'VERTICAL') {
 									childNode.counterAxisSizingMode = 'FIXED'
+									childNode.layoutGrow = 0
 								} else {
 									childNode.primaryAxisSizingMode = 'FIXED'
+									
 								}
 								childNode.layoutAlign = 'INHERIT'	
 							break
@@ -200,11 +202,12 @@ figma.ui.onmessage = msg => {
 						// check what height alignment is wished for and change settings according to that wish
 						switch (msg.height) {
 							case 'fix':
-								childNode.layoutGrow = 0
 								if (childNode.layoutMode == 'HORIZONTAL') {
 									childNode.counterAxisSizingMode = 'FIXED'
+									childNode.layoutGrow = 0
 								} else {
 									childNode.primaryAxisSizingMode = 'FIXED'
+									
 								}
 								childNode.layoutAlign = 'INHERIT'
 							break
