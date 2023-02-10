@@ -25,15 +25,27 @@ figma.ui.onmessage = msg => {
 			var node = currentNode as FrameNode
 			switch (msg.width) {
 				case 'fix':
-					node.counterAxisSizingMode = 'FIXED'
-					console.log("get here")
+					if (node.layoutMode == 'VERTICAL') {
+						node.counterAxisSizingMode = 'FIXED'
+						console.log("get here")
+					} else {
+						node.primaryAxisSizingMode = 'FIXED'
+					}
+
 				break
 				case 'hug':
-					node.counterAxisSizingMode = 'AUTO'
-					node.layoutAlign = 'INHERIT'
+					if (node.layoutMode == 'VERTICAL') {
+						node.counterAxisSizingMode = 'AUTO'
+					} else {
+						node.primaryAxisSizingMode = 'AUTO'
+					}
 				break
 				case 'fill':
-					node.counterAxisSizingMode = 'FIXED'
+					if (node.layoutMode == 'VERTICAL') {
+						node.counterAxisSizingMode = 'FIXED'
+					} else {
+						node.primaryAxisSizingMode = 'FIXED'
+					}
 				break
 				case '':
 					break
@@ -42,21 +54,27 @@ figma.ui.onmessage = msg => {
 
 			switch (msg.height) {
 				case 'fix':
-					node.primaryAxisSizingMode = 'FIXED'
-					//childNode.layoutAlign = 'INHERIT'
-					node.layoutGrow = 0
-					console.log("get here2")
+					if (node.layoutMode == 'HORIZONTAL') {
+						node.counterAxisSizingMode = 'FIXED'
+						console.log("get here")
+					} else {
+						node.primaryAxisSizingMode = 'FIXED'
+					}
+
 				break
 				case 'hug':
-					node.primaryAxisSizingMode = 'AUTO'
-					node.layoutAlign = 'INHERIT'
+					if (node.layoutMode == 'HORIZONTAL') {
+						node.counterAxisSizingMode = 'AUTO'
+					} else {
+						node.primaryAxisSizingMode = 'AUTO'
+					}
 				break
 				case 'fill':
-					node.primaryAxisSizingMode = 'FIXED'
-					node.layoutGrow = 0
-
-					//parent.layoutMode = 'VERTICAL'
-					
+					if (node.layoutMode == 'HORIZONTAL') {
+						node.counterAxisSizingMode = 'FIXED'
+					} else {
+						node.primaryAxisSizingMode = 'FIXED'
+					}
 				break
 				case '':
 					break
@@ -89,9 +107,20 @@ figma.ui.onmessage = msg => {
 
 
 				for (var child of childrenNodes) {
-					if(child.type == 'FRAME') {
-						var childNode = child as FrameNode
-						var parent = child.parent as FrameNode
+					if(child.type == 'FRAME' || child.type == 'COMPONENT' || child.type == 'INSTANCE') {
+						var childNode;
+						switch(child.type) {
+							case 'FRAME':
+								childNode = child as FrameNode
+							break
+							case 'COMPONENT':
+								childNode = child as ComponentNode
+							break
+							case 'INSTANCE':
+								childNode = child as InstanceNode
+							break
+							default:
+						}
 
 						switch (msg.width) {
 							case 'fix':
@@ -115,10 +144,8 @@ figma.ui.onmessage = msg => {
 							break
 							case 'fill':
 								if (childNode.layoutMode == 'VERTICAL') {
-									parent.primaryAxisSizingMode = 'FIXED'
 									childNode.layoutGrow = 1
 								} else {
-									parent.counterAxisSizingMode = 'FIXED'
 									childNode.layoutAlign = 'STRETCH'
 								}
 
@@ -148,10 +175,8 @@ figma.ui.onmessage = msg => {
 							break
 							case 'fill':
 								if (childNode.layoutMode == 'HORIZONTAL') {
-									parent.primaryAxisSizingMode = 'FIXED'
 									childNode.layoutGrow = 1
 								} else {
-									parent.counterAxisSizingMode = 'FIXED'
 									childNode.layoutAlign = 'STRETCH'
 								}
 								

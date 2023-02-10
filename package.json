@@ -41,10 +41,11 @@
     "gulp-sass": "^5.1.0",
     "gulp-typescript": "^6.0.0-alpha.1",
     "gulp-util": "^3.0.8",
-    "node-sass": "^7.0.1",
     "typescript": "*"
   },
   "dependencies": {
-    "gulp-htmlmin": "^5.0.1"
+    "gulp-htmlmin": "^5.0.1",
+    "node-sass": "^8.0.0",
+    "sass": "^1.58.0"
   }
 }
