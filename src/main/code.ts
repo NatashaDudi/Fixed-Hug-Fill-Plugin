@@ -70,6 +70,7 @@ figma.ui.onmessage = msg => {
 					}
 				break
 				case 'fill':
+					
 					if (node.layoutMode == 'HORIZONTAL') {
 						node.counterAxisSizingMode = 'FIXED'
 					} else {
@@ -85,26 +86,58 @@ figma.ui.onmessage = msg => {
 			// look at all children of the selected node
 			if ('children' in currentNode) {
 				var childrenNodes = currentNode.findAll()
-
-
 				// making sure all frames are "fix" before "fill"
 				if(msg.width == 'fill' || msg.width == 'hug') {
 					for (var child of childrenNodes) {
-						if (child.type == 'FRAME') {
-							child.primaryAxisSizingMode = 'FIXED'
+						if (child.type == 'FRAME' && msg.width == 'fill' ) {
+							if (child.layoutMode == 'VERTICAL') {
+								child.counterAxisSizingMode = 'FIXED'
+								child.layoutAlign = 'INHERIT'
+							} else {
+								child.primaryAxisSizingMode = 'FIXED'
+								child.layoutGrow = 0
+							}
+						} else if (child.type == 'FRAME' && msg.width == 'hug' ) {
+							if (child.layoutMode == 'HORIZONTAL') {
+								child.counterAxisSizingMode = 'FIXED'
+								child.layoutAlign = 'INHERIT'
+							} else {
+								child.primaryAxisSizingMode = 'FIXED'
+								child.layoutGrow = 0
+							}
 						}
+						
 
 					}
 				}
 				if(msg.height == 'fill' || msg.width == 'hug') {
 					for (var child of childrenNodes) {
-						if (child.type == 'FRAME') {
-							child.counterAxisSizingMode = 'FIXED'
+						if (child.type == 'FRAME' && msg.width == 'fill') {
+							if (child.layoutMode == 'HORIZONTAL') {
+								child.counterAxisSizingMode = 'FIXED'
+								child.layoutAlign = 'INHERIT'
+							} else {
+								child.primaryAxisSizingMode = 'FIXED'
+								child.layoutGrow = 0
+							}
+
+						} else if (child.type == 'FRAME' && msg.width == 'hug' ) {
+							if (child.layoutMode == 'VERTICAL') {
+								child.counterAxisSizingMode = 'FIXED'
+								child.layoutAlign = 'INHERIT'
+							} else {
+								child.primaryAxisSizingMode = 'FIXED'
+								child.layoutGrow = 0
+							}
 						}
 
-					}
-				}
+						
 
+					}
+				} 
+
+
+				
 
 				for (var child of childrenNodes) {
 					if(child.type == 'FRAME' || child.type == 'COMPONENT' || child.type == 'INSTANCE') {
@@ -134,6 +167,8 @@ figma.ui.onmessage = msg => {
 								childNode.layoutAlign = 'INHERIT'
 								
 								
+								
+								
 							break
 							case 'hug':
 								if (childNode.layoutMode == 'VERTICAL') {
@@ -141,11 +176,26 @@ figma.ui.onmessage = msg => {
 								} else {
 									childNode.primaryAxisSizingMode = 'AUTO'
 								}
+								
 							break
 							case 'fill':
-								if (childNode.layoutMode == 'VERTICAL') {
+								switch(childNode.parent.type) {
+									case 'FRAME':
+										var parent = childNode.parent as FrameNode
+									break /*
+									case 'COMPONENT':
+										var parent = childNode.parent as ComponentNode
+									break
+									case 'INSTANCE':
+										var parent = childNode.parent as InstanceNode
+									break
+									default:*/
+								}
+								if (parent.layoutMode == 'HORIZONTAL') {
+									
 									childNode.layoutGrow = 1
 								} else {
+									
 									childNode.layoutAlign = 'STRETCH'
 								}
 
@@ -165,16 +215,31 @@ figma.ui.onmessage = msg => {
 								}
 								childNode.layoutAlign = 'INHERIT'
 								
+								
 							break
 							case 'hug':
 								if (childNode.layoutMode == 'HORIZONTAL') {
 									childNode.counterAxisSizingMode = 'AUTO'
 								} else {
 									childNode.primaryAxisSizingMode = 'AUTO'
+									
 								}
+								
 							break
 							case 'fill':
-								if (childNode.layoutMode == 'HORIZONTAL') {
+								switch(childNode.parent.type) {
+									case 'FRAME':
+										var parent = childNode.parent as FrameNode
+									break /*
+									case 'COMPONENT':
+										var parent = childNode.parent as ComponentNode
+									break
+									case 'INSTANCE':
+										var parent = childNode.parent as InstanceNode
+									break
+									default:*/
+								}
+								if (parent.layoutMode == 'VERTICAL') {
 									childNode.layoutGrow = 1
 								} else {
 									childNode.layoutAlign = 'STRETCH'
@@ -238,3 +303,4 @@ figma.ui.onmessage = msg => {
 		figma.closePlugin();
 	}
 };
+
