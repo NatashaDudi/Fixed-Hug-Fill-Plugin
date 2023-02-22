@@ -19,10 +19,14 @@
             </select>
         </p>
 
+        <!--
         <div>
             <input type="checkbox" id="w_innerst_child" name="w_innerst_child" checked="checked">
-            <label for="w_innerst_child" class="type--small"> include innerst content</label><br>
+            <label for="w_innerst_child" class="type--small"> include innermost content</label><br>
         </div>
+
+        -->
+
 
         <p><br></p>
 
@@ -35,10 +39,13 @@
             </select>
         </p>
 
+        <!--
         <div>
             <input type="checkbox" id="h_innerst_child" name="h_innerst_child" checked="checked">
-            <label for="h_innerst_child" class="type--small"> include innerst content</label>
+            <label for="h_innerst_child" class="type--small"> include innermost content</label>
         </div>
+
+        -->
 
         <p></p>
 
@@ -52,9 +59,9 @@
             parent.postMessage({ pluginMessage: { 
                 type: 'start', 
                 width: document.getElementById('width_select').value,
-                w_innerst_child: document.getElementById('w_innerst_child').checked,
+                //w_innerst_child: document.getElementById('w_innerst_child').checked,
                 height: document.getElementById('height_select').value,
-                h_innerst_child: document.getElementById('h_innerst_child').checked,
+                //h_innerst_child: document.getElementById('h_innerst_child').checked,
             } }, '*')
             }
             
