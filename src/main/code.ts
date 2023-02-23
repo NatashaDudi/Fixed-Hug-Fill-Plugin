@@ -18,13 +18,13 @@ figma.ui.onmessage = msg => {
 		// loop over all selected object
 		for (var i in figma.currentPage.selection) {
 			var currentNode = figma.currentPage.selection[i]
-			changeAlignProperties(currentNode, false, msg.width, msg.height)
+			changeAlignProperties(currentNode as AutolayoutFrame, false, msg.width, msg.height)
 			
 			if ('children' in currentNode) {
 				var childrenNodes = currentNode.findAll()
 				for (var child of childrenNodes) {
 					if (child.type == 'FRAME' || child.type == 'COMPONENT' || child.type == 'INSTANCE') {
-						changeAlignProperties(child, true, msg.width, msg.height)
+						changeAlignProperties(child as AutolayoutFrame, true, msg.width, msg.height)
 					}
 				}
 			}
@@ -38,52 +38,31 @@ figma.ui.onmessage = msg => {
 };
 
 
-function changeAlignProperties(sceneNode: SceneNode, isChild: Boolean, msgWidth: String, msgHeight: String){
+function changeAlignProperties(node: AutolayoutFrame, isChild: Boolean, msgWidth: String, msgHeight: String){
 
-	var node = sceneNode as AutolayoutFrame
-
-	/*
-	// was used to typecast but it seems as if that is not neccesary anymore...
-	switch (sceneNode.type) {
-		case 'FRAME':
-			node = sceneNode as FrameNode
-		break
-		case 'COMPONENT':
-			node = sceneNode as ComponentNode
-		break
-		case 'INSTANCE':
-			node = sceneNode as InstanceNode
-		break
-		default:
-			return 
-	}*/
-
-
-	
 	// if width has to be changed to fixed or this is the outermost node that will have filled children
 	if (msgWidth == 'fix' || (msgWidth == 'fill' && !isChild)) {
 		// than we change the width setting to 'fixed'
-		fix(sceneNode, true)
+		fix(node, true)
 	} else if (msgWidth == 'hug') {
-		hug(sceneNode, true)
+		hug(node, true)
 	} else if (msgWidth == 'fill' && isChild) {
-		fill(sceneNode, true)
+		fill(node, true)
 	}
 
 	// if height has to be changed to fixed or this is the outermost node that will have filled children
 	if (msgHeight == 'fix' || (msgHeight == 'fill' && !isChild)) {
 		// than we change the height setting to 'fixed'
-		fix(sceneNode, false)
+		fix(node, false)
 	} else if (msgHeight == 'hug') {
-		hug(sceneNode, false)
+		hug(node, false)
 	} else if (msgHeight == 'fill' && isChild) {
-		fill(sceneNode, false)
+		fill(node, false)
 	}
 }
 
 // method to either change the width or height setting to 'Fixed'
-function fix(sceneNode: SceneNode, isForWidth: Boolean){
-	var node = sceneNode as AutolayoutFrame
+function fix(node: AutolayoutFrame, isForWidth: Boolean){
 	
 	// changes width settings
 	if(isForWidth) {
@@ -93,7 +72,6 @@ function fix(sceneNode: SceneNode, isForWidth: Boolean){
 			node.counterAxisSizingMode = 'FIXED'
 		}
 
-
 	} else {
 		//changes height settings
 		if (node.layoutMode == 'VERTICAL') {
@@ -101,15 +79,13 @@ function fix(sceneNode: SceneNode, isForWidth: Boolean){
 		} else {
 			node.counterAxisSizingMode = 'FIXED'
 		}
-
 	}
 	getAlignmentFill(node, isForWidth)
 	
 }
 
 // method to either change the width or height setting to 'Hug'
-function hug(sceneNode: SceneNode, isForWidth: Boolean){
-	var node = sceneNode as AutolayoutFrame
+function hug(node: AutolayoutFrame, isForWidth: Boolean){
 
 	// changes width settings
 	if(isForWidth) {
@@ -134,9 +110,8 @@ function hug(sceneNode: SceneNode, isForWidth: Boolean){
 }
 
 //method to either change the width or height setting to 'Fill'
-function fill(sceneNode: SceneNode, isForWidth: Boolean) {
-	var node = sceneNode as AutolayoutFrame
-	var parentNode = sceneNode.parent as AutolayoutFrame
+function fill(node: AutolayoutFrame, isForWidth: Boolean) {
+	var parentNode = node.parent as AutolayoutFrame
 
 	if(isForWidth) {
 		if (node.layoutMode == 'HORIZONTAL') {
@@ -172,9 +147,8 @@ function fill(sceneNode: SceneNode, isForWidth: Boolean) {
 }
 
 // method to determine whether the width or height propoerty was set to 'filled' before changing it
-function getAlignmentFill(sceneNode: SceneNode, isForWidth: Boolean) {
-	var parent = sceneNode.parent as AutolayoutFrame
-	var node = sceneNode as AutolayoutFrame
+function getAlignmentFill(node: AutolayoutFrame, isForWidth: Boolean) {
+	var parent = node.parent as AutolayoutFrame
 
 	if (parent.layoutMode == 'VERTICAL') {
 		if(isForWidth) {
@@ -192,4 +166,31 @@ function getAlignmentFill(sceneNode: SceneNode, isForWidth: Boolean) {
 		}
 	}
 }
+
+/*
+function changeAlignmentSizingMode(node: AutolayoutFrame, isForWidth: Boolean, isFixed: Boolean) {
+	var changeSetting
+	if(isFixed) {
+		changeSetting = 'FIXED'
+	} else {
+		changeSetting = 'AUTO'
+	}
+
+	// changes width settings
+	if(isForWidth) {
+		if (node.layoutMode == 'HORIZONTAL') {
+			node.primaryAxisSizingMode = changeSetting
+		} else {
+			node.counterAxisSizingMode = changeSetting
+		}
+
+	} else {
+		// changes height settings
+		if (node.layoutMode == 'VERTICAL') {
+			node.primaryAxisSizingMode = changeSetting
+		} else {
+			node.counterAxisSizingMode = changeSetting
+		}
+	}
+}*/
 
