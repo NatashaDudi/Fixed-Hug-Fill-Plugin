@@ -37,7 +37,6 @@ figma.ui.onmessage = msg => {
 	}
 };
 
-
 function changeAlignProperties(node: AutolayoutFrame, isChild: Boolean, msgWidth: String, msgHeight: String){
 
 	// if width has to be changed to fixed or this is the outermost node that will have filled children
@@ -63,113 +62,27 @@ function changeAlignProperties(node: AutolayoutFrame, isChild: Boolean, msgWidth
 
 // method to either change the width or height setting to 'Fixed'
 function fix(node: AutolayoutFrame, isForWidth: Boolean){
-	
-	// changes width settings
-	if(isForWidth) {
-		if (node.layoutMode == 'HORIZONTAL') {
-			node.primaryAxisSizingMode = 'FIXED'
-		} else {
-			node.counterAxisSizingMode = 'FIXED'
-		}
-
-	} else {
-		//changes height settings
-		if (node.layoutMode == 'VERTICAL') {
-			node.primaryAxisSizingMode = 'FIXED'
-		} else {
-			node.counterAxisSizingMode = 'FIXED'
-		}
-	}
-	getAlignmentFill(node, isForWidth)
+	changeAlignmentSizingMode(node, isForWidth, true)
+	changeLayout(node, isForWidth, true)
 	
 }
 
 // method to either change the width or height setting to 'Hug'
 function hug(node: AutolayoutFrame, isForWidth: Boolean){
-
-	// changes width settings
-	if(isForWidth) {
-		if (node.layoutMode == 'HORIZONTAL') {
-			node.primaryAxisSizingMode = 'AUTO'
-		} else {
-			node.counterAxisSizingMode = 'AUTO'
-		}
-
-
-	} else {
-		// changes height settings
-		if (node.layoutMode == 'VERTICAL') {
-			node.primaryAxisSizingMode = 'AUTO'
-		} else {
-			node.counterAxisSizingMode = 'AUTO'
-		}
-
-	}
-
-	getAlignmentFill(node, isForWidth)
+	changeAlignmentSizingMode(node, isForWidth, false)
+	changeLayout(node, isForWidth, true)
 }
 
 //method to either change the width or height setting to 'Fill'
 function fill(node: AutolayoutFrame, isForWidth: Boolean) {
-	var parentNode = node.parent as AutolayoutFrame
-
-	if(isForWidth) {
-		if (node.layoutMode == 'HORIZONTAL') {
-			node.primaryAxisSizingMode = 'FIXED'
-		} else {
-			node.counterAxisSizingMode = 'FIXED'
-		}
-
-	} else {
-		//changes height settings
-		if (node.layoutMode == 'VERTICAL') {
-			node.primaryAxisSizingMode = 'FIXED'
-		} else {
-			node.counterAxisSizingMode = 'FIXED'
-		}
-	}
-
-	// changes width settings
-	if(isForWidth) {
-		if (parentNode.layoutMode == 'VERTICAL') {
-			node.layoutAlign = 'STRETCH'
-		} else {
-			node.layoutGrow = 1	
-		}
-	} else {
-		//changes height settings
-		if (parentNode.layoutMode == 'HORIZONTAL') {
-			node.layoutAlign = 'STRETCH'
-		} else {
-			node.layoutGrow = 1
-		}
-	}
+	changeAlignmentSizingMode(node, isForWidth, true)
+	changeLayout(node, isForWidth, false)
 }
 
-// method to determine whether the width or height propoerty was set to 'filled' before changing it
-function getAlignmentFill(node: AutolayoutFrame, isForWidth: Boolean) {
-	var parent = node.parent as AutolayoutFrame
+type FixedAuto = 'FIXED' | 'AUTO'
 
-	if (parent.layoutMode == 'VERTICAL') {
-		if(isForWidth) {
-			node.layoutAlign = 'INHERIT'
-		} else {
-			node.layoutGrow = 0
-		}
-	}
-
-	if (parent.layoutMode == 'HORIZONTAL') {
-		if(!isForWidth) {
-			node.layoutAlign = 'INHERIT'
-		} else {
-			node.layoutGrow = 0
-		}
-	}
-}
-
-/*
 function changeAlignmentSizingMode(node: AutolayoutFrame, isForWidth: Boolean, isFixed: Boolean) {
-	var changeSetting
+	var changeSetting: FixedAuto
 	if(isFixed) {
 		changeSetting = 'FIXED'
 	} else {
@@ -192,5 +105,36 @@ function changeAlignmentSizingMode(node: AutolayoutFrame, isForWidth: Boolean, i
 			node.counterAxisSizingMode = changeSetting
 		}
 	}
-}*/
+}
+
+type StretchInheritOptions = 'MIN' | 'CENTER' | 'MAX' | 'STRETCH' | 'INHERIT'
+
+function changeLayout(node: AutolayoutFrame, isForWidth: Boolean, isFixed: Boolean) {
+	var parent = node.parent as AutolayoutFrame
+	var changeSetting
+	var changeSetting2: StretchInheritOptions
+	if(isFixed) {
+		changeSetting = 0
+		changeSetting2 = 'INHERIT'
+	} else {
+		changeSetting = 1
+		changeSetting2 = 'STRETCH'
+	}
+
+	// changes width settings
+	if(isForWidth) {
+		if (parent.layoutMode == 'HORIZONTAL') {
+			node.layoutGrow = changeSetting	
+		} else {
+			node.layoutAlign = changeSetting2
+		}
+	} else {
+		//changes height settings
+		if (parent.layoutMode == 'VERTICAL') {
+			node.layoutGrow = changeSetting		
+		} else {
+			node.layoutAlign = changeSetting2
+		}
+	}
+}
 
