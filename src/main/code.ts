@@ -93,7 +93,7 @@ function changeAlignmentSizingMode(node: AutolayoutFrame, isForWidth: Boolean, i
 	if(isForWidth) {
 		if (node.layoutMode == 'HORIZONTAL') {
 			node.primaryAxisSizingMode = changeSetting
-		} else {
+		} else if (node.layoutMode == 'VERTICAL') {
 			node.counterAxisSizingMode = changeSetting
 		}
 
@@ -101,7 +101,7 @@ function changeAlignmentSizingMode(node: AutolayoutFrame, isForWidth: Boolean, i
 		// changes height settings
 		if (node.layoutMode == 'VERTICAL') {
 			node.primaryAxisSizingMode = changeSetting
-		} else {
+		} else if (node.layoutMode == 'HORIZONTAL'){
 			node.counterAxisSizingMode = changeSetting
 		}
 	}
@@ -125,14 +125,14 @@ function changeLayout(node: AutolayoutFrame, isForWidth: Boolean, isFixed: Boole
 	if(isForWidth) {
 		if (parent.layoutMode == 'HORIZONTAL') {
 			node.layoutGrow = changeSetting	
-		} else {
+		} else if (parent.layoutMode == 'VERTICAL'){
 			node.layoutAlign = changeSetting2
 		}
 	} else {
 		//changes height settings
 		if (parent.layoutMode == 'VERTICAL') {
 			node.layoutGrow = changeSetting		
-		} else {
+		} else if (parent.layoutMode == 'HORIZONTAL'){
 			node.layoutAlign = changeSetting2
 		}
 	}
