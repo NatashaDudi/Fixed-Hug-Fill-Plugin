@@ -62,21 +62,20 @@ function changeAlignProperties(node: AutolayoutFrame, isChild: Boolean, msgWidth
 
 // method to either change the width or height setting to 'Fixed'
 function fix(node: AutolayoutFrame, isForWidth: Boolean){
-	changeAlignmentSizingMode(node, isForWidth, true)
 	changeLayout(node, isForWidth, true)
-	
+	changeAlignmentSizingMode(node, isForWidth, true)
 }
 
 // method to either change the width or height setting to 'Hug'
 function hug(node: AutolayoutFrame, isForWidth: Boolean){
-	changeAlignmentSizingMode(node, isForWidth, false)
 	changeLayout(node, isForWidth, true)
+	changeAlignmentSizingMode(node, isForWidth, false)
 }
 
 //method to either change the width or height setting to 'Fill'
 function fill(node: AutolayoutFrame, isForWidth: Boolean) {
-	changeAlignmentSizingMode(node, isForWidth, true)
 	changeLayout(node, isForWidth, false)
+	changeAlignmentSizingMode(node, isForWidth, true)
 }
 
 type FixedAuto = 'FIXED' | 'AUTO'
@@ -93,7 +92,7 @@ function changeAlignmentSizingMode(node: AutolayoutFrame, isForWidth: Boolean, i
 	if(isForWidth) {
 		if (node.layoutMode == 'HORIZONTAL') {
 			node.primaryAxisSizingMode = changeSetting
-		} else if (node.layoutMode == 'VERTICAL') {
+		} else {
 			node.counterAxisSizingMode = changeSetting
 		}
 
@@ -101,7 +100,7 @@ function changeAlignmentSizingMode(node: AutolayoutFrame, isForWidth: Boolean, i
 		// changes height settings
 		if (node.layoutMode == 'VERTICAL') {
 			node.primaryAxisSizingMode = changeSetting
-		} else if (node.layoutMode == 'HORIZONTAL'){
+		} else {
 			node.counterAxisSizingMode = changeSetting
 		}
 	}
@@ -125,14 +124,14 @@ function changeLayout(node: AutolayoutFrame, isForWidth: Boolean, isFixed: Boole
 	if(isForWidth) {
 		if (parent.layoutMode == 'HORIZONTAL') {
 			node.layoutGrow = changeSetting	
-		} else if (parent.layoutMode == 'VERTICAL'){
+		} else {
 			node.layoutAlign = changeSetting2
 		}
 	} else {
 		//changes height settings
 		if (parent.layoutMode == 'VERTICAL') {
 			node.layoutGrow = changeSetting		
-		} else if (parent.layoutMode == 'HORIZONTAL'){
+		} else {
 			node.layoutAlign = changeSetting2
 		}
 	}
