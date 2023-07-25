@@ -25,7 +25,7 @@
   },
   "homepage": "https://github.com/thecodercoder/frontend-boilerplate#readme",
   "devDependencies": {
-    "@figma/plugin-typings": "^1.45.0",
+    "@figma/plugin-typings": "^1.71.1",
     "autoprefixer": "^10.4.7",
     "del": "^6.1.0",
     "figma-plugin-ds": "^1.0.1",

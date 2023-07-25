@@ -23,14 +23,48 @@ figma.ui.onmessage = msg => {
 			for (var i in selection) {
 				var currentNode = selection[i]
 				changeAlignProperties(currentNode as AutolayoutFrame, false, msg.width, msg.height)
-
 				if ('children' in currentNode) {
 					var childrenNodes = currentNode.findAll()
 
 					for (var child of childrenNodes) {
+						var childFrame = child as FrameNode
+						var parent = child.parent as FrameNode
+
+						if (msg.width == 'fix') {
+							if (childFrame.layoutMode != 'NONE') {
+								childFrame.layoutSizingHorizontal = 'FIXED'
+							}
+						} else if (msg.width == 'hug') {
+							/* // not sure how his new function works
+							if (parent.layoutMode == 'HORIZONTAL') {
+								childFrame.layoutSizingHorizontal = 'HUG'
+							} else if (parent.layoutMode == 'VERTICAL') {
+								childFrame.layoutSizingVertical = 'HUG'
+							}*/ 
+							changeAlignProperties(child as AutolayoutFrame, true, msg.width, msg.height)
+
+						} else if (msg.width == 'fill') {
+							if (parent.layoutMode != 'NONE') {
+								childFrame.layoutSizingHorizontal = 'FILL'
+							}
+						}
+
+						if (msg.height == 'fix') {
+							if (childFrame.layoutMode != 'NONE') {
+								childFrame.layoutSizingVertical = 'FIXED'
+							}
+						} else if (msg.height == 'hug') {
+							changeAlignProperties(child as AutolayoutFrame, true, msg.width, msg.height)
+						} else if (msg.height == 'fill') {
+							if (parent.layoutMode != 'NONE') {
+								childFrame.layoutSizingVertical = 'FILL'
+							}
+						}
+
+						/*
 						if (child.type == 'FRAME' || child.type == 'COMPONENT' || child.type == 'INSTANCE') {
 							changeAlignProperties(child as AutolayoutFrame, true, msg.width, msg.height)
-						}
+						}*/
 					}
 				}
 			}
@@ -67,25 +101,25 @@ function changeAlignProperties(node: AutolayoutFrame, isChild: Boolean, msgWidth
 
 // method to either change the width or height setting to 'Fixed'
 function fix(node: AutolayoutFrame, isForWidth: Boolean) {
-	changeLayout(node, isForWidth, true)
-	changeAlignmentSizingMode(node, isForWidth, true)
+	fixOrStretch(node, isForWidth, true)
+	fixOrHug(node, isForWidth, true)
 }
 
 // method to either change the width or height setting to 'Hug'
 function hug(node: AutolayoutFrame, isForWidth: Boolean) {
-	changeLayout(node, isForWidth, true)
-	changeAlignmentSizingMode(node, isForWidth, false)
+	fixOrStretch(node, isForWidth, true)
+	fixOrHug(node, isForWidth, false)
 }
 
 //method to either change the width or height setting to 'Fill'
 function fill(node: AutolayoutFrame, isForWidth: Boolean) {
-	changeLayout(node, isForWidth, false)
-	changeAlignmentSizingMode(node, isForWidth, true)
+	fixOrStretch(node, isForWidth, false)
+	fixOrHug(node, isForWidth, true)
 }
 
 type FixedAuto = 'FIXED' | 'AUTO'
 
-function changeAlignmentSizingMode(node: AutolayoutFrame, isForWidth: Boolean, isFixed: Boolean) {
+function fixOrHug(node: AutolayoutFrame, isForWidth: Boolean, isFixed: Boolean) {
 	var changeSetting: FixedAuto
 	if (isFixed) {
 		changeSetting = 'FIXED'
@@ -113,7 +147,7 @@ function changeAlignmentSizingMode(node: AutolayoutFrame, isForWidth: Boolean, i
 
 type StretchInheritOptions = 'MIN' | 'CENTER' | 'MAX' | 'STRETCH' | 'INHERIT'
 
-function changeLayout(node: AutolayoutFrame, isForWidth: Boolean, isFixed: Boolean) {
+function fixOrStretch(node: AutolayoutFrame, isForWidth: Boolean, isFixed: Boolean) {
 	var parent = node.parent as AutolayoutFrame
 	var changeSetting
 	var changeSetting2: StretchInheritOptions

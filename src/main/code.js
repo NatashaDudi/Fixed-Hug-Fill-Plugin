@@ -21,9 +21,44 @@ figma.ui.onmessage = msg => {
                 if ('children' in currentNode) {
                     var childrenNodes = currentNode.findAll();
                     for (var child of childrenNodes) {
-                        if (child.type == 'FRAME' || child.type == 'COMPONENT' || child.type == 'INSTANCE') {
+                        var childFrame = child;
+                        var parent = child.parent;
+                        if (msg.width == 'fix') {
+                            if (childFrame.layoutMode != 'NONE') {
+                                childFrame.layoutSizingHorizontal = 'FIXED';
+                            }
+                        }
+                        else if (msg.width == 'hug') {
+                            /* // not sure how his new function works
+                            if (parent.layoutMode == 'HORIZONTAL') {
+                                childFrame.layoutSizingHorizontal = 'HUG'
+                            } else if (parent.layoutMode == 'VERTICAL') {
+                                childFrame.layoutSizingVertical = 'HUG'
+                            }*/
                             changeAlignProperties(child, true, msg.width, msg.height);
                         }
+                        else if (msg.width == 'fill') {
+                            if (parent.layoutMode != 'NONE') {
+                                childFrame.layoutSizingHorizontal = 'FILL';
+                            }
+                        }
+                        if (msg.height == 'fix') {
+                            if (childFrame.layoutMode != 'NONE') {
+                                childFrame.layoutSizingVertical = 'FIXED';
+                            }
+                        }
+                        else if (msg.height == 'hug') {
+                            changeAlignProperties(child, true, msg.width, msg.height);
+                        }
+                        else if (msg.height == 'fill') {
+                            if (parent.layoutMode != 'NONE') {
+                                childFrame.layoutSizingVertical = 'FILL';
+                            }
+                        }
+                        /*
+                        if (child.type == 'FRAME' || child.type == 'COMPONENT' || child.type == 'INSTANCE') {
+                            changeAlignProperties(child as AutolayoutFrame, true, msg.width, msg.height)
+                        }*/
                     }
                 }
             }
@@ -61,20 +96,20 @@ function changeAlignProperties(node, isChild, msgWidth, msgHeight) {
 }
 // method to either change the width or height setting to 'Fixed'
 function fix(node, isForWidth) {
-    changeLayout(node, isForWidth, true);
-    changeAlignmentSizingMode(node, isForWidth, true);
+    fixOrStretch(node, isForWidth, true);
+    fixOrHug(node, isForWidth, true);
 }
 // method to either change the width or height setting to 'Hug'
 function hug(node, isForWidth) {
-    changeLayout(node, isForWidth, true);
-    changeAlignmentSizingMode(node, isForWidth, false);
+    fixOrStretch(node, isForWidth, true);
+    fixOrHug(node, isForWidth, false);
 }
 //method to either change the width or height setting to 'Fill'
 function fill(node, isForWidth) {
-    changeLayout(node, isForWidth, false);
-    changeAlignmentSizingMode(node, isForWidth, true);
+    fixOrStretch(node, isForWidth, false);
+    fixOrHug(node, isForWidth, true);
 }
-function changeAlignmentSizingMode(node, isForWidth, isFixed) {
+function fixOrHug(node, isForWidth, isFixed) {
     var changeSetting;
     if (isFixed) {
         changeSetting = 'FIXED';
@@ -101,7 +136,7 @@ function changeAlignmentSizingMode(node, isForWidth, isFixed) {
         }
     }
 }
-function changeLayout(node, isForWidth, isFixed) {
+function fixOrStretch(node, isForWidth, isFixed) {
     var parent = node.parent;
     var changeSetting;
     var changeSetting2;
