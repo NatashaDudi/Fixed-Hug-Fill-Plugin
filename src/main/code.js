@@ -1,19 +1,13 @@
 /* This plugin allows you to select multiple objects from which all layers will be effected
 on how to change the width or height settings (no change, to 'fixed', 'hug' or 'fill')*/
-if (figma.currentPage.selection.length == 0) {
-    figma.closePlugin("You need to select something to use this plugin 3.");
-}
-else {
+if (checkSelectionType(figma.currentPage.selection)) {
     figma.showUI(__html__, { width: 400, height: 300, title: "Fixed-Hug-Fill" });
 }
 // use message from UI to do the following:
 figma.ui.onmessage = msg => {
     if (msg.type === 'start') {
         var selection = figma.currentPage.selection;
-        if (selection.length == 0) {
-            //figma.closePlugin("You need to select something to use this plugin.");
-        }
-        else {
+        if (checkSelectionType(selection)) {
             // loop over all selected objects
             for (var i in selection) {
                 var currentNode = selection[i];
@@ -23,36 +17,39 @@ figma.ui.onmessage = msg => {
                     for (var child of childrenNodes) {
                         var childFrame = child;
                         var parent = child.parent;
-                        if (msg.width == 'fix') {
-                            if (childFrame.layoutMode != 'NONE') {
-                                childFrame.layoutSizingHorizontal = 'FIXED';
-                            }
-                        }
-                        else if (msg.width == 'hug') {
-                            /* // not sure how his new function works
-                            if (parent.layoutMode == 'HORIZONTAL') {
-                                childFrame.layoutSizingHorizontal = 'HUG'
-                            } else if (parent.layoutMode == 'VERTICAL') {
-                                childFrame.layoutSizingVertical = 'HUG'
-                            }*/
+                        if (child.type == 'FRAME' || child.type == 'COMPONENT' || child.type == 'INSTANCE') {
                             changeAlignProperties(child, true, msg.width, msg.height);
                         }
-                        else if (msg.width == 'fill') {
-                            if (parent.layoutMode != 'NONE') {
-                                childFrame.layoutSizingHorizontal = 'FILL';
+                        else if (child.type == 'TEXT' || child.type == 'RECTANGLE' || child.type == 'GROUP' || child.type == 'ELLIPSE' || child.type == 'LINE' || child.type == 'POLYGON' || child.type == 'STAR') {
+                            if (msg.width == 'fix') {
+                                if (childFrame.layoutMode != 'NONE') {
+                                    childFrame.layoutSizingHorizontal = 'FIXED';
+                                }
                             }
-                        }
-                        if (msg.height == 'fix') {
-                            if (childFrame.layoutMode != 'NONE') {
-                                childFrame.layoutSizingVertical = 'FIXED';
+                            else if (msg.width == 'hug' && child.type == 'TEXT') {
+                                if (childFrame.layoutMode != 'NONE') {
+                                    childFrame.layoutSizingHorizontal = 'HUG';
+                                }
                             }
-                        }
-                        else if (msg.height == 'hug') {
-                            changeAlignProperties(child, true, msg.width, msg.height);
-                        }
-                        else if (msg.height == 'fill') {
-                            if (parent.layoutMode != 'NONE') {
-                                childFrame.layoutSizingVertical = 'FILL';
+                            else if (msg.width == 'fill') {
+                                if (parent.layoutMode != 'NONE' && child.parent.type != 'GROUP') {
+                                    childFrame.layoutSizingHorizontal = 'FILL';
+                                }
+                            }
+                            if (msg.height == 'fix') {
+                                if (childFrame.layoutMode != 'NONE') {
+                                    childFrame.layoutSizingVertical = 'FIXED';
+                                }
+                            }
+                            else if (msg.height == 'hug' && child.type == 'TEXT') {
+                                if (childFrame.layoutMode != 'NONE') {
+                                    childFrame.layoutSizingVertical = 'HUG';
+                                }
+                            }
+                            else if (msg.height == 'fill') {
+                                if (parent.layoutMode != 'NONE' && child.parent.type != 'GROUP') {
+                                    childFrame.layoutSizingVertical = 'FILL';
+                                }
                             }
                         }
                         /*
@@ -166,4 +163,17 @@ function fixOrStretch(node, isForWidth, isFixed) {
             node.layoutAlign = changeSetting2;
         }
     }
+}
+function checkSelectionType(selection) {
+    if (selection.length == 0) {
+        figma.closePlugin("You need to select something to use this plugin.");
+        return false;
+    }
+    for (var i in selection) {
+        if (selection[i].type != 'FRAME') {
+            figma.closePlugin("You need to select frames to use this plugin");
+            return false;
+        }
+    }
+    return true;
 }
