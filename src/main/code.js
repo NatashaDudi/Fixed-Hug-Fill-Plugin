@@ -1,25 +1,111 @@
 /* This plugin allows you to select multiple objects from which all layers will be effected
 on how to change the width or height settings (no change, to 'fixed', 'hug' or 'fill')*/
-// This shows the HTML page in "ui.html".
-figma.showUI(__html__, { width: 400, height: 300, title: "Fixed-Hug-Fill" });
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+if (figma.currentPage.selection.length == 0) {
+    figma.closePlugin("You need to select something to use this plugin.");
+}
+else {
+    figma.showUI(__html__, { width: 400, height: 300, title: "Fixed-Hug-Fill" });
+}
 // use message from UI to do the following:
 figma.ui.onmessage = msg => {
     if (msg.type === 'start') {
-        if (figma.currentPage.selection.length == 0) {
+        var selection = figma.currentPage.selection;
+        if (selection.length == 0) {
             figma.closePlugin("You need to select something to use this plugin.");
         }
-        // loop over all selected object
-        for (var i in figma.currentPage.selection) {
-            var currentNode = figma.currentPage.selection[i];
-            changeAlignProperties(currentNode, false, msg.width, msg.height);
-            if ('children' in currentNode) {
-                var childrenNodes = currentNode.findAll();
-                for (var child of childrenNodes) {
-                    if (child.type == 'FRAME' || child.type == 'COMPONENT' || child.type == 'INSTANCE') {
-                        changeAlignProperties(child, true, msg.width, msg.height);
-                    }
+        else {
+            let fontNames = new Set();
+            // Gather all selected TextNodes
+            var textNodes = [];
+            for (var i = 0; i < selection.length; i++) {
+                var frameNode = selection[i];
+                var textNodeList = frameNode.findAll(n => (n.type == "TEXT"));
+                for (var j = 0; j < textNodeList.length; j++) {
+                    textNodes.push(textNodeList[j]);
                 }
             }
+            // Gather all fonts from the TextNodes
+            for (var i = 0; i < textNodes.length; i++) {
+                if (!fontNames.has(textNodes[i].fontName)) {
+                    fontNames.add(textNodes[i].fontName);
+                }
+            }
+            // Get allowance to use fonts
+            const loadFonts = () => __awaiter(this, void 0, void 0, function* () {
+                for (let fontName of fontNames) {
+                    yield figma.loadFontAsync({ family: fontName['family'], style: fontName["style"] });
+                }
+            });
+            // Start to update table
+            loadFonts().then(() => {
+                figma.closePlugin("made it");
+            });
+            /*
+                        let fontNames = new Set<FontName>()
+            
+                        // Gather all selected TextNodes
+                        var textNodes: TextNode[] = []
+                        for (var i = 0; i < selection.length; i++) {
+                            var frameNode = selection[i] as FrameNode
+                            var textNodeList = frameNode.findAll(n => (n.type == "TEXT"))
+                            for (var j = 0; j < textNodeList.length; j++) {
+                                textNodes.push(textNodeList[j] as TextNode)
+                            }
+                        }
+            
+                        // Gather all fonts from the TextNodes
+                        for (var i = 0; i < textNodes.length; i++) {
+                            if (!fontNames.has(textNodes[i].fontName as FontName)) {
+                                fontNames.add(textNodes[i].fontName as FontName)
+                            }
+                        }
+            
+                        // Get allowance to use fonts
+                        const loadFonts = async () => {
+                            for (let fontName of fontNames) {
+                                await figma.loadFontAsync({ family: fontName['family'], style: fontName["style"] })
+                            }
+                        }
+            
+                        // Start to update table
+                        loadFonts().then(() => {
+                            // loop over all selected objects
+                            for (var i in selection) {
+                                var currentNode = selection[i]
+                                changeAlignProperties(currentNode as AutolayoutFrame, false, msg.width, msg.height)
+            
+                                if ('children' in currentNode) {
+                                    var childrenNodes = currentNode.findAll()
+            
+                                    for (var child of childrenNodes) {
+                                        var parent = child.parent as FrameNode
+                                        if (child.type == 'ELLIPSE' || child.type == 'GROUP' || child.type == 'RECTANGLE') {
+                                            console.log("get here?");
+                                            parent.primaryAxisAlignItems = 'MAX'
+                                            parent.counterAxisAlignItems = 'MAX'
+                                        } else if (child.type == "TEXT") {
+                                            console.log("get to Text");
+                                            var textNode = child as TextNode
+                                            textNode.textAlignHorizontal = 'RIGHT'
+                                            parent.primaryAxisAlignItems = 'MAX'
+                                            parent.counterAxisAlignItems = 'MAX'
+                                        } else if (child.type == 'FRAME' || child.type == 'COMPONENT' || child.type == 'INSTANCE') {
+                                            changeAlignProperties(child as AutolayoutFrame, true, msg.width, msg.height)
+                                        }
+                                    }
+                                }
+                            }
+                            figma.closePlugin();
+                        })*/
         }
         figma.closePlugin();
     }
@@ -28,150 +114,100 @@ figma.ui.onmessage = msg => {
         figma.closePlugin();
     }
 };
-function changeAlignProperties(sceneNode, isChild, msgWidth, msgHeight) {
-    var node = sceneNode;
-    /*
-    // was used to typecast but it seems as if that is not neccesary anymore...
-    switch (sceneNode.type) {
-        case 'FRAME':
-            node = sceneNode as FrameNode
-        break
-        case 'COMPONENT':
-            node = sceneNode as ComponentNode
-        break
-        case 'INSTANCE':
-            node = sceneNode as InstanceNode
-        break
-        default:
-            return
-    }*/
+function changeAlignProperties(node, isChild, msgWidth, msgHeight) {
     // if width has to be changed to fixed or this is the outermost node that will have filled children
     if (msgWidth == 'fix' || (msgWidth == 'fill' && !isChild)) {
         // than we change the width setting to 'fixed'
-        fix(sceneNode, true);
+        fix(node, true);
     }
     else if (msgWidth == 'hug') {
-        hug(sceneNode, true);
+        hug(node, true);
     }
     else if (msgWidth == 'fill' && isChild) {
-        fill(sceneNode, true);
+        fill(node, true);
     }
     // if height has to be changed to fixed or this is the outermost node that will have filled children
     if (msgHeight == 'fix' || (msgHeight == 'fill' && !isChild)) {
         // than we change the height setting to 'fixed'
-        fix(sceneNode, false);
+        fix(node, false);
     }
     else if (msgHeight == 'hug') {
-        hug(sceneNode, false);
+        hug(node, false);
     }
     else if (msgHeight == 'fill' && isChild) {
-        fill(sceneNode, false);
+        fill(node, false);
     }
 }
 // method to either change the width or height setting to 'Fixed'
-function fix(sceneNode, isForWidth) {
-    var node = sceneNode;
-    // changes width settings
-    if (isForWidth) {
-        if (node.layoutMode == 'HORIZONTAL') {
-            node.primaryAxisSizingMode = 'FIXED';
-        }
-        else {
-            node.counterAxisSizingMode = 'FIXED';
-        }
-    }
-    else {
-        //changes height settings
-        if (node.layoutMode == 'VERTICAL') {
-            node.primaryAxisSizingMode = 'FIXED';
-        }
-        else {
-            node.counterAxisSizingMode = 'FIXED';
-        }
-    }
-    getAlignmentFill(node, isForWidth);
+function fix(node, isForWidth) {
+    changeLayout(node, isForWidth, true);
+    changeAlignmentSizingMode(node, isForWidth, true);
 }
 // method to either change the width or height setting to 'Hug'
-function hug(sceneNode, isForWidth) {
-    var node = sceneNode;
+function hug(node, isForWidth) {
+    changeLayout(node, isForWidth, true);
+    changeAlignmentSizingMode(node, isForWidth, false);
+}
+//method to either change the width or height setting to 'Fill'
+function fill(node, isForWidth) {
+    changeLayout(node, isForWidth, false);
+    changeAlignmentSizingMode(node, isForWidth, true);
+}
+function changeAlignmentSizingMode(node, isForWidth, isFixed) {
+    var changeSetting;
+    if (isFixed) {
+        changeSetting = 'FIXED';
+    }
+    else {
+        changeSetting = 'AUTO';
+    }
     // changes width settings
     if (isForWidth) {
         if (node.layoutMode == 'HORIZONTAL') {
-            node.primaryAxisSizingMode = 'AUTO';
+            node.primaryAxisSizingMode = changeSetting;
         }
-        else {
-            node.counterAxisSizingMode = 'AUTO';
+        else if (node.layoutMode == 'VERTICAL') {
+            node.counterAxisSizingMode = changeSetting;
         }
     }
     else {
         // changes height settings
         if (node.layoutMode == 'VERTICAL') {
-            node.primaryAxisSizingMode = 'AUTO';
+            node.primaryAxisSizingMode = changeSetting;
         }
-        else {
-            node.counterAxisSizingMode = 'AUTO';
+        else if (node.layoutMode == 'HORIZONTAL') {
+            node.counterAxisSizingMode = changeSetting;
         }
     }
-    getAlignmentFill(node, isForWidth);
 }
-//method to either change the width or height setting to 'Fill'
-function fill(sceneNode, isForWidth) {
-    var node = sceneNode;
-    var parentNode = sceneNode.parent;
-    if (isForWidth) {
-        if (node.layoutMode == 'HORIZONTAL') {
-            node.primaryAxisSizingMode = 'FIXED';
-        }
-        else {
-            node.counterAxisSizingMode = 'FIXED';
-        }
+function changeLayout(node, isForWidth, isFixed) {
+    var parent = node.parent;
+    var changeSetting;
+    var changeSetting2;
+    if (isFixed) {
+        changeSetting = 0;
+        changeSetting2 = 'INHERIT';
     }
     else {
-        //changes height settings
-        if (node.layoutMode == 'VERTICAL') {
-            node.primaryAxisSizingMode = 'FIXED';
-        }
-        else {
-            node.counterAxisSizingMode = 'FIXED';
-        }
+        changeSetting = 1;
+        changeSetting2 = 'STRETCH';
     }
     // changes width settings
     if (isForWidth) {
-        if (parentNode.layoutMode == 'VERTICAL') {
-            node.layoutAlign = 'STRETCH';
+        if (parent.layoutMode == 'HORIZONTAL') {
+            node.layoutGrow = changeSetting;
         }
-        else {
-            node.layoutGrow = 1;
+        else if (parent.layoutMode == 'VERTICAL') {
+            node.layoutAlign = changeSetting2;
         }
     }
     else {
         //changes height settings
-        if (parentNode.layoutMode == 'HORIZONTAL') {
-            node.layoutAlign = 'STRETCH';
+        if (parent.layoutMode == 'VERTICAL') {
+            node.layoutGrow = changeSetting;
         }
-        else {
-            node.layoutGrow = 1;
-        }
-    }
-}
-// method to determine whether the width or height propoerty was set to 'filled' before changing it
-function getAlignmentFill(sceneNode, isForWidth) {
-    var parent = sceneNode.parent;
-    var node = sceneNode;
-    if (parent.layoutMode == 'VERTICAL') {
-        if (isForWidth) {
-            node.layoutAlign = 'INHERIT';
-        }
-        else {
-            node.layoutGrow = 0;
-        }
-    }
-    if (parent.layoutMode == 'HORIZONTAL') {
-        if (!isForWidth) {
-            node.layoutAlign = 'INHERIT';
-        }
-        else {
-            node.layoutGrow = 0;
+        else if (parent.layoutMode == 'HORIZONTAL') {
+            node.layoutAlign = changeSetting2;
         }
     }
 }
