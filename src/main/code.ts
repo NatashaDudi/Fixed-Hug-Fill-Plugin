@@ -3,10 +3,9 @@ on how to change the width or height settings (no change, to 'fixed', 'hug' or '
 
 // create a type that includes all types that have autolayout
 type AutolayoutFrame = FrameNode | ComponentNode | InstanceNode
-type NoAutolayoutFrame = EllipseNode | GroupNode | LineNode | PolygonNode | RectangleNode | TextNode | VectorNode
 
 if (figma.currentPage.selection.length == 0) {
-	figma.closePlugin("You need to select something to use this plugin.");
+	figma.closePlugin("You need to select something to use this plugin 3.");
 } else {
 	figma.showUI(__html__, { width: 400, height: 300, title: "Fixed-Hug-Fill" });
 }
@@ -17,97 +16,24 @@ figma.ui.onmessage = msg => {
 	if (msg.type === 'start') {
 		var selection = figma.currentPage.selection
 		if (selection.length == 0) {
-			figma.closePlugin("You need to select something to use this plugin.");
+			//figma.closePlugin("You need to select something to use this plugin.");
 		} else {
 
-			let fontNames = new Set<FontName>()
+			// loop over all selected objects
+			for (var i in selection) {
+				var currentNode = selection[i]
+				changeAlignProperties(currentNode as AutolayoutFrame, false, msg.width, msg.height)
 
-			// Gather all selected TextNodes
-			var textNodes: TextNode[] = []
-			for (var i = 0; i < selection.length; i++) {
-				var frameNode = selection[i] as FrameNode
-				var textNodeList = frameNode.findAll(n => (n.type == "TEXT"))
-				for (var j = 0; j < textNodeList.length; j++) {
-					textNodes.push(textNodeList[j] as TextNode)
-				}
-			}
+				if ('children' in currentNode) {
+					var childrenNodes = currentNode.findAll()
 
-			// Gather all fonts from the TextNodes
-			for (var i = 0; i < textNodes.length; i++) {
-				if (!fontNames.has(textNodes[i].fontName as FontName)) {
-					fontNames.add(textNodes[i].fontName as FontName)
-				}
-			}
-
-			// Get allowance to use fonts
-			const loadFonts = async () => {
-				for (let fontName of fontNames) {
-					await figma.loadFontAsync({ family: fontName['family'], style: fontName["style"] })
-				}
-			}
-
-			// Start to update table
-			loadFonts().then(() => {
-				figma.closePlugin("made it");
-			})
-
-/*
-			let fontNames = new Set<FontName>()
-
-			// Gather all selected TextNodes
-			var textNodes: TextNode[] = []
-			for (var i = 0; i < selection.length; i++) {
-				var frameNode = selection[i] as FrameNode
-				var textNodeList = frameNode.findAll(n => (n.type == "TEXT"))
-				for (var j = 0; j < textNodeList.length; j++) {
-					textNodes.push(textNodeList[j] as TextNode)
-				}
-			}
-
-			// Gather all fonts from the TextNodes
-			for (var i = 0; i < textNodes.length; i++) {
-				if (!fontNames.has(textNodes[i].fontName as FontName)) {
-					fontNames.add(textNodes[i].fontName as FontName)
-				}
-			}
-
-			// Get allowance to use fonts
-			const loadFonts = async () => {
-				for (let fontName of fontNames) {
-					await figma.loadFontAsync({ family: fontName['family'], style: fontName["style"] })
-				}
-			}
-
-			// Start to update table
-			loadFonts().then(() => {
-				// loop over all selected objects
-				for (var i in selection) {
-					var currentNode = selection[i]
-					changeAlignProperties(currentNode as AutolayoutFrame, false, msg.width, msg.height)
-
-					if ('children' in currentNode) {
-						var childrenNodes = currentNode.findAll()
-
-						for (var child of childrenNodes) {
-							var parent = child.parent as FrameNode
-							if (child.type == 'ELLIPSE' || child.type == 'GROUP' || child.type == 'RECTANGLE') {
-								console.log("get here?");
-								parent.primaryAxisAlignItems = 'MAX'
-								parent.counterAxisAlignItems = 'MAX'
-							} else if (child.type == "TEXT") {
-								console.log("get to Text");
-								var textNode = child as TextNode
-								textNode.textAlignHorizontal = 'RIGHT'
-								parent.primaryAxisAlignItems = 'MAX'
-								parent.counterAxisAlignItems = 'MAX'
-							} else if (child.type == 'FRAME' || child.type == 'COMPONENT' || child.type == 'INSTANCE') {
-								changeAlignProperties(child as AutolayoutFrame, true, msg.width, msg.height)
-							}
+					for (var child of childrenNodes) {
+						if (child.type == 'FRAME' || child.type == 'COMPONENT' || child.type == 'INSTANCE') {
+							changeAlignProperties(child as AutolayoutFrame, true, msg.width, msg.height)
 						}
 					}
 				}
-				figma.closePlugin();
-			})*/
+			}
 		}
 		figma.closePlugin();
 	} else {
