@@ -11,46 +11,16 @@ figma.ui.onmessage = msg => {
             // loop over all selected objects
             for (var i in selection) {
                 var currentNode = selection[i];
-                changeAlignProperties(currentNode, false, msg.width, msg.height);
+                changeAutolayoutResizing(currentNode, false, msg.width, msg.height);
                 if ('children' in currentNode) {
                     var childrenNodes = currentNode.findAll();
                     for (var child of childrenNodes) {
                         var childFrame = child;
-                        var parent = child.parent;
                         if (child.type == 'FRAME' || child.type == 'INSTANCE' || child.type == 'COMPONENT' || child.type == 'COMPONENT_SET') {
-                            changeAlignProperties(child, true, msg.width, msg.height);
+                            changeAutolayoutResizing(child, true, msg.width, msg.height);
                         }
                         else if (child.type == 'TEXT' || child.type == 'RECTANGLE' || child.type == 'GROUP' || child.type == 'ELLIPSE' || child.type == 'LINE' || child.type == 'POLYGON' || child.type == 'STAR' || child.type == 'VECTOR') {
-                            if (msg.width == 'fix') {
-                                if (childFrame.layoutMode != 'NONE') {
-                                    childFrame.layoutSizingHorizontal = 'FIXED';
-                                }
-                            }
-                            else if (msg.width == 'hug' && child.type == 'TEXT') {
-                                if (hasAutolayoutCharacteristics(childFrame) && parent.layoutMode != 'NONE' && child.parent.type != 'GROUP') {
-                                    childFrame.layoutSizingHorizontal = 'HUG';
-                                }
-                            }
-                            else if (msg.width == 'fill') {
-                                if (parent.layoutMode != 'NONE' && childFrame.layoutPositioning == 'AUTO' && child.parent.type != 'GROUP') {
-                                    childFrame.layoutSizingHorizontal = 'FILL';
-                                }
-                            }
-                            if (msg.height == 'fix') {
-                                if (childFrame.layoutMode != 'NONE') {
-                                    childFrame.layoutSizingVertical = 'FIXED';
-                                }
-                            }
-                            else if (msg.height == 'hug' && child.type == 'TEXT') {
-                                if (hasAutolayoutCharacteristics(childFrame) && child.parent.type != 'GROUP') {
-                                    childFrame.layoutSizingVertical = 'HUG';
-                                }
-                            }
-                            else if (msg.height == 'fill') {
-                                if (parent.layoutMode != 'NONE' && childFrame.layoutPositioning == 'AUTO' && child.parent.type != 'GROUP') {
-                                    childFrame.layoutSizingVertical = 'FILL';
-                                }
-                            }
+                            changeShapeResizing(child, childFrame, child.parent, msg.width, msg.height);
                         }
                     }
                 }
@@ -63,7 +33,7 @@ figma.ui.onmessage = msg => {
         figma.closePlugin();
     }
 };
-function changeAlignProperties(node, isChild, msgWidth, msgHeight) {
+function changeAutolayoutResizing(node, isChild, msgWidth, msgHeight) {
     if (node.layoutMode == 'NONE') {
         return;
     }
@@ -88,6 +58,38 @@ function changeAlignProperties(node, isChild, msgWidth, msgHeight) {
     }
     else if (msgHeight == 'fill' && isChild) {
         fill(node, false);
+    }
+}
+function changeShapeResizing(child, childFrame, parent, msgWidth, msgHeight) {
+    if (msgWidth == 'fix') {
+        if (childFrame.layoutMode != 'NONE') {
+            childFrame.layoutSizingHorizontal = 'FIXED';
+        }
+    }
+    else if (msgWidth == 'hug' && child.type == 'TEXT') {
+        if (hasAutolayoutCharacteristics(childFrame) && parent.layoutMode != 'NONE' && child.parent.type != 'GROUP') {
+            childFrame.layoutSizingHorizontal = 'HUG';
+        }
+    }
+    else if (msgWidth == 'fill') {
+        if (parent.layoutMode != 'NONE' && childFrame.layoutPositioning == 'AUTO' && child.parent.type != 'GROUP') {
+            childFrame.layoutSizingHorizontal = 'FILL';
+        }
+    }
+    if (msgHeight == 'fix') {
+        if (childFrame.layoutMode != 'NONE') {
+            childFrame.layoutSizingVertical = 'FIXED';
+        }
+    }
+    else if (msgHeight == 'hug' && child.type == 'TEXT') {
+        if (hasAutolayoutCharacteristics(childFrame) && child.parent.type != 'GROUP') {
+            childFrame.layoutSizingVertical = 'HUG';
+        }
+    }
+    else if (msgHeight == 'fill') {
+        if (parent.layoutMode != 'NONE' && childFrame.layoutPositioning == 'AUTO' && child.parent.type != 'GROUP') {
+            childFrame.layoutSizingVertical = 'FILL';
+        }
     }
 }
 // method to either change the width or height setting to 'Fixed'
