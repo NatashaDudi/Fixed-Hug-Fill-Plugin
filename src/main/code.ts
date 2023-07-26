@@ -2,12 +2,12 @@
 on how to change the width or height settings (no change, to 'fixed', 'hug' or 'fill')*/
 
 // create a type that includes all types that have autolayout
-type AutolayoutFrame = FrameNode | ComponentNode | InstanceNode
+type AutolayoutFrame = FrameNode | ComponentNode | InstanceNode | ComponentSetNode
+type FixedHugFill = AutolayoutFrame | TextNode
 
 if (checkSelectionType(figma.currentPage.selection)) {
-	figma.showUI(__html__, { width: 400, height: 300, title: "Fixed-Hug-Fill" }); 
+	figma.showUI(__html__, { width: 400, height: 300, title: "Fixed-Hug-Fill" });
 }
-
 
 // use message from UI to do the following:
 figma.ui.onmessage = msg => {
@@ -26,19 +26,19 @@ figma.ui.onmessage = msg => {
 						var childFrame = child as FrameNode
 						var parent = child.parent as FrameNode
 
-						if (child.type == 'FRAME' || child.type == 'COMPONENT' || child.type == 'INSTANCE') {
+						if (child.type == 'FRAME' || child.type == 'INSTANCE' || child.type == 'COMPONENT' || child.type == 'COMPONENT_SET') {
 							changeAlignProperties(child as AutolayoutFrame, true, msg.width, msg.height)
-						} else if (child.type == 'TEXT' || child.type == 'RECTANGLE' || child.type == 'GROUP'|| child.type == 'ELLIPSE' || child.type == 'LINE' || child.type == 'POLYGON' || child.type == 'STAR') {
+						} else if (child.type ==  'TEXT' || child.type == 'RECTANGLE' || child.type == 'GROUP' || child.type == 'ELLIPSE' || child.type == 'LINE' || child.type == 'POLYGON' || child.type == 'STAR' || child.type == 'VECTOR') {
 							if (msg.width == 'fix') {
 								if (childFrame.layoutMode != 'NONE') {
 									childFrame.layoutSizingHorizontal = 'FIXED'
 								}
 							} else if (msg.width == 'hug' && child.type == 'TEXT') {
-								if (childFrame.layoutMode != 'NONE') {
+								if (hasAutolayoutCharacteristics(childFrame) && parent.layoutMode != 'NONE' && child.parent.type != 'GROUP') {
 									childFrame.layoutSizingHorizontal = 'HUG'
 								}
 							} else if (msg.width == 'fill') {
-								if (parent.layoutMode != 'NONE' && child.parent.type != 'GROUP') {
+								if (parent.layoutMode != 'NONE' && childFrame.layoutPositioning == 'AUTO' && child.parent.type != 'GROUP') {
 									childFrame.layoutSizingHorizontal = 'FILL'
 								}
 							}
@@ -48,21 +48,15 @@ figma.ui.onmessage = msg => {
 									childFrame.layoutSizingVertical = 'FIXED'
 								}
 							} else if (msg.height == 'hug' && child.type == 'TEXT') {
-								if (childFrame.layoutMode != 'NONE') {
+								if (hasAutolayoutCharacteristics(childFrame) && child.parent.type != 'GROUP') {
 									childFrame.layoutSizingVertical = 'HUG'
 								}
 							} else if (msg.height == 'fill') {
-								if (parent.layoutMode != 'NONE' && child.parent.type != 'GROUP') {
+								if (parent.layoutMode != 'NONE' && childFrame.layoutPositioning == 'AUTO' && child.parent.type != 'GROUP') {
 									childFrame.layoutSizingVertical = 'FILL'
 								}
 							}
-						}
-
-
-						/*
-						if (child.type == 'FRAME' || child.type == 'COMPONENT' || child.type == 'INSTANCE') {
-							changeAlignProperties(child as AutolayoutFrame, true, msg.width, msg.height)
-						}*/
+						} 
 					}
 				}
 			}
@@ -75,6 +69,10 @@ figma.ui.onmessage = msg => {
 };
 
 function changeAlignProperties(node: AutolayoutFrame, isChild: Boolean, msgWidth: String, msgHeight: String) {
+
+	if (node.layoutMode == 'NONE') {
+		return
+	}
 
 	// if width has to be changed to fixed or this is the outermost node that will have filled children
 	if (msgWidth == 'fix' || (msgWidth == 'fill' && !isChild)) {
@@ -95,6 +93,7 @@ function changeAlignProperties(node: AutolayoutFrame, isChild: Boolean, msgWidth
 	} else if (msgHeight == 'fill' && isChild) {
 		fill(node, false)
 	}
+
 }
 
 // method to either change the width or height setting to 'Fixed'
@@ -178,14 +177,17 @@ function checkSelectionType(selection: readonly SceneNode[]) {
 	if (selection.length == 0) {
 		figma.closePlugin("You need to select something to use this plugin.");
 		return false
-	} 
+	}
 
 	for (var i in selection) {
-		if (selection[i].type != 'FRAME') {
-			figma.closePlugin("You need to select frames to use this plugin");
+		if (selection[i].type != 'FRAME' && selection[i].type != 'COMPONENT' && selection[i].type != 'INSTANCE' && selection[i].type != 'COMPONENT_SET') {
+			figma.closePlugin("You need to select frames, components or instances to use this plugin.");
 			return false
 		}
 	}
-	
 	return true
+}
+
+function hasAutolayoutCharacteristics(node: FrameNode) {
+	return (node.layoutMode != 'NONE' && node.layoutPositioning == 'AUTO')
 }
