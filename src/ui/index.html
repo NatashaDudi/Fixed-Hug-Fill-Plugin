@@ -19,17 +19,6 @@
             </select>
         </p>
 
-        <!--
-        <div>
-            <input type="checkbox" id="w_innerst_child" name="w_innerst_child" checked="checked">
-            <label for="w_innerst_child" class="type--small"> include innermost content</label><br>
-        </div>
-
-        -->
-
-
-        
-
         <p class="type--small">Change all frames in <strong>height</strong> dimension &nbsp;&nbsp;&nbsp;&nbsp;
             <select name="height" id="height_select">
                 <option value="">No Changes</option>
@@ -39,13 +28,19 @@
             </select>
         </p>
 
-        <!--
+                
         <div>
-            <input type="checkbox" id="h_innerst_child" name="h_innerst_child" checked="checked">
-            <label for="h_innerst_child" class="type--small"> include innermost content</label>
+            <input type="checkbox" id="include_shapes" name="include_shapes" checked="checked">
+            <label for="include_shapes" class="type--small"> include shapes</label><br>
         </div>
 
-        -->
+        
+        <div>
+            <input type="checkbox" id="ignore_hidden" name="ignore_hidden" checked="checked">
+            <label for="ignore_hidden" class="type--small"> ignore hidden elements</label>
+        </div>
+
+    
 
         <p></p>
 
@@ -59,9 +54,9 @@
             parent.postMessage({ pluginMessage: { 
                 type: 'start', 
                 width: document.getElementById('width_select').value,
-                //w_innerst_child: document.getElementById('w_innerst_child').checked,
+                include_shapes: document.getElementById('include_shapes').checked,
                 height: document.getElementById('height_select').value,
-                //h_innerst_child: document.getElementById('h_innerst_child').checked,
+                ignore_hidden: document.getElementById('ignore_hidden').checked,
             } }, '*')
             }
             

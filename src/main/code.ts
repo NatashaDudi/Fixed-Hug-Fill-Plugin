@@ -12,6 +12,9 @@ if (checkSelectionType(figma.currentPage.selection)) {
 // use message from UI to do the following:
 figma.ui.onmessage = msg => {
 	if (msg.type === 'start') {
+		if (msg.ignore_hidden) {
+			figma.skipInvisibleInstanceChildren = true
+		}
 		var selection = figma.currentPage.selection
 		if (checkSelectionType(selection)) {
 
@@ -20,14 +23,24 @@ figma.ui.onmessage = msg => {
 				var currentNode = selection[i]
 				changeAutolayoutResizing(currentNode as AutolayoutFrame, false, msg.width, msg.height)
 				if ('children' in currentNode) {
-					var childrenNodes = currentNode.findAll()
+					var childrenNodes
 
+					// ignore hidden nodes if requested (this is faster)
+					if (msg.ignore_hidden) {
+						childrenNodes = currentNode.findAll(node => node.visible === true)
+					} else {
+						childrenNodes = currentNode.findAll()
+					} 
+
+					// get all children from the selected node and categorise them by type
 					for (var child of childrenNodes) {
 						var childFrame = child as FrameNode
 
 						if (child.type == 'FRAME' || child.type == 'INSTANCE' || child.type == 'COMPONENT' || child.type == 'COMPONENT_SET') {
 							changeAutolayoutResizing(child as AutolayoutFrame, true, msg.width, msg.height)
-						} else if (child.type ==  'TEXT' || child.type == 'RECTANGLE' || child.type == 'GROUP' || child.type == 'ELLIPSE' || child.type == 'LINE' || child.type == 'POLYGON' || child.type == 'STAR' || child.type == 'VECTOR') {
+						} else if (child.type ==  'TEXT') {
+							changeShapeResizing(child, childFrame, child.parent as FrameNode, msg.width, msg.height)
+						} else if (msg.include_shapes && (child.type == 'RECTANGLE' || child.type == 'GROUP' || child.type == 'ELLIPSE' || child.type == 'LINE' || child.type == 'POLYGON' || child.type == 'STAR' || child.type == 'VECTOR')) {
 							changeShapeResizing(child, childFrame, child.parent as FrameNode, msg.width, msg.height)
 						} 
 					}
